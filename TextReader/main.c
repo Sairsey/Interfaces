@@ -10,6 +10,8 @@
 #include "ui/ui.h"
 #include "globals/global.h"
 #include "file_support/file_support.h"
+#include "string_support/string_support.h"
+
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -99,11 +101,17 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 Globals.TextBlue = 255;
                 Globals.TextGreen = 255;
 
+                Globals.LineHeight = 32;
+
                 // Create font I like
-                Globals.hFont = CreateFont(32, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Brush Script MT"));
+                Globals.hFont = CreateFont(Globals.LineHeight, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Comic Sans MS"));
+
+                FillFontData(&Globals);
 
                 if (MyReadFile(OurCreateStruct->lpCreateParams, &Globals))
+                {
                     Globals.IsInited = TRUE;
+                }
             }
             break;
         case WM_SIZE:
@@ -112,6 +120,9 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             {
                 Globals.WindowWidth = LOWORD(lParam);
                 Globals.WindowHeight = HIWORD(lParam);
+                ClearDrawStrings(&Globals);
+                BuildDrawStrings(&Globals);
+                InvalidateRect(hwnd, NULL, TRUE);
                 MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
             }
             break;

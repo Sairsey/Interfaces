@@ -2,6 +2,7 @@
 #ifndef __GLOBALS_H_
 #define __GLOBALS_H_
 
+#include <tchar.h>
 #include <windows.h>
 
 // flag for enabling logging
@@ -22,6 +23,9 @@ typedef struct tag_global_data
     char *LoadedBuffer;    // pointer on loaded data
     long LoadedBufferSize; // size of loaded buffer
 
+    char **DrawBuffer;     // pointer on data to draw
+    long DrawBufferLines;  // amount of lines in array
+
     long WindowWidth;      // Width of window
     long WindowHeight;     // Width of window
     HWND HWnd;             // Handle Window
@@ -38,6 +42,12 @@ typedef struct tag_global_data
     char TextGreen;
 
     HFONT hFont; // my font
+    long LineHeight; // size of font actually
+    long BaselineToBaseline; // distance from baseline to baseline
+    long SymbolWidth[256]; // Table that contains symbols width (for non-monospace fonts)
+    long MinSymbolWidth;  // For determining maximum line width in characters
+
+
 } global_data;
 
 void MyDebugMessage(const char *format, ...);

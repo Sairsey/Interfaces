@@ -5,4 +5,6 @@
 
 void DrawTextOnScreen(global_data *globals);
 
+void FillFontData(global_data *globals);
+
 #endif // __UI_H_

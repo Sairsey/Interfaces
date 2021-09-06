@@ -4,10 +4,11 @@
 	<stdio.h>
 	<stdarg.h>
 
-1630948745 e:\github\interfaces\textreader\globals\global.h
+1630958003 e:\github\interfaces\textreader\globals\global.h
+	<tchar.h>
 	<windows.h>
 
-1630942388 source:e:\github\interfaces\textreader\file_support\file_support.c
+1630957968 source:e:\github\interfaces\textreader\file_support\file_support.c
 	"file_support.h"
 	<stdio.h>
 	<stdlib.h>
@@ -15,16 +16,23 @@
 1630942296 e:\github\interfaces\textreader\file_support\file_support.h
 	"../globals/global.h"
 
-1630948859 source:e:\github\interfaces\textreader\main.c
+1630958034 source:e:\github\interfaces\textreader\main.c
 	<tchar.h>
 	<windows.h>
 	"ui/ui.h"
 	"globals/global.h"
 	"file_support/file_support.h"
+	"string_support/string_support.h"
 
-1630947377 e:\github\interfaces\textreader\ui\ui.h
+1630951817 e:\github\interfaces\textreader\ui\ui.h
 	"../globals/global.h"
 
-1630949210 source:e:\github\interfaces\textreader\ui\ui.c
+1630958110 source:e:\github\interfaces\textreader\ui\ui.c
 	"ui.h"
+
+1630958648 source:e:\github\interfaces\textreader\string_support\string_support.c
+	"string_support.h"
+
+1630950776 e:\github\interfaces\textreader\string_support\string_support.h
+	"../globals/global.h"
 
