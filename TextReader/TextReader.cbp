@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="orwell.txt" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -37,6 +38,10 @@
 			<Add library="kernel32" />
 			<Add library="comctl32" />
 		</Linker>
+		<Unit filename="file_support/file_support.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="file_support/file_support.h" />
 		<Unit filename="globals/global.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -44,6 +49,14 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="string_support/string_support.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="string_support/string_support.h" />
+		<Unit filename="ui/ui.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ui/ui.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
