@@ -4,7 +4,8 @@
 	<stdio.h>
 	<stdarg.h>
 
-1630942369 e:\github\interfaces\textreader\globals\global.h
+1630948745 e:\github\interfaces\textreader\globals\global.h
+	<windows.h>
 
 1630942388 source:e:\github\interfaces\textreader\file_support\file_support.c
 	"file_support.h"
@@ -14,9 +15,16 @@
 1630942296 e:\github\interfaces\textreader\file_support\file_support.h
 	"../globals/global.h"
 
-1630942343 source:e:\github\interfaces\textreader\main.c
+1630948859 source:e:\github\interfaces\textreader\main.c
 	<tchar.h>
 	<windows.h>
+	"ui/ui.h"
 	"globals/global.h"
 	"file_support/file_support.h"
+
+1630947377 e:\github\interfaces\textreader\ui\ui.h
+	"../globals/global.h"
+
+1630949210 source:e:\github\interfaces\textreader\ui\ui.c
+	"ui.h"
 

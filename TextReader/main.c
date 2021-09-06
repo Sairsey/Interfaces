@@ -7,6 +7,7 @@
 #include <tchar.h>
 #include <windows.h>
 
+#include "ui/ui.h"
 #include "globals/global.h"
 #include "file_support/file_support.h"
 
@@ -85,23 +86,47 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     {
         case WM_CREATE:
             {
-                CREATESTRUCT *OurCreaeStruct = (CREATESTRUCT *)lParam;
-                MyDebugMessage("Create\n");
-                if (MyReadFile(OurCreaeStruct->lpCreateParams, &Globals))
+                CREATESTRUCT *OurCreateStruct = (CREATESTRUCT *)lParam;
+                MyDebugMessage("WM_Create\n");
+                Globals.HWnd = hwnd;
+                Globals.hInstanse = OurCreateStruct->hInstance;
+
+                // just like VS2017
+                Globals.BackRed = 30;
+                Globals.BackBlue = 30;
+                Globals.BackGreen = 30;
+                Globals.TextRed = 255;
+                Globals.TextBlue = 255;
+                Globals.TextGreen = 255;
+
+                // Create font I like
+                Globals.hFont = CreateFont(32, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Brush Script MT"));
+
+                if (MyReadFile(OurCreateStruct->lpCreateParams, &Globals))
                     Globals.IsInited = TRUE;
             }
             break;
         case WM_SIZE:
-            MyDebugMessage("Size\n");
+            MyDebugMessage("WM_Size\n");
             if (Globals.IsInited)
             {
-
+                Globals.WindowWidth = LOWORD(lParam);
+                Globals.WindowHeight = HIWORD(lParam);
+                MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
+            }
+            break;
+        case WM_PAINT:
+            MyDebugMessage("WM_Paint\n");
+            if (Globals.IsInited)
+            {
+                DrawTextOnScreen(&Globals);
             }
             break;
         case WM_DESTROY:
             if (Globals.IsInited)
             {
-
+                SafeDelete(Globals.LoadedBuffer);
+                DeleteObject(Globals.hFont);
             }
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
             break;
