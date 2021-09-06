@@ -1,0 +1,22 @@
+# depslib dependency file v1.0
+1630941137 source:e:\github\interfaces\textreader\globals\global.c
+	"global.h"
+	<stdio.h>
+	<stdarg.h>
+
+1630942369 e:\github\interfaces\textreader\globals\global.h
+
+1630942388 source:e:\github\interfaces\textreader\file_support\file_support.c
+	"file_support.h"
+	<stdio.h>
+	<stdlib.h>
+
+1630942296 e:\github\interfaces\textreader\file_support\file_support.h
+	"../globals/global.h"
+
+1630942343 source:e:\github\interfaces\textreader\main.c
+	<tchar.h>
+	<windows.h>
+	"globals/global.h"
+	"file_support/file_support.h"
+
