@@ -36,3 +36,42 @@
 1630950776 e:\github\interfaces\textreader\string_support\string_support.h
 	"../globals/global.h"
 
+1631445673 source:d:\work\interfaces\interfaces\textreader\main.c
+	<tchar.h>
+	<windows.h>
+	"globals/global.h"
+	<stdio.h>
+	<stdarg.h>
+
+1631443569 d:\work\interfaces\interfaces\textreader\globals\global.h
+	<tchar.h>
+	<windows.h>
+	"../defines.h"
+	"../input_buffer/input_buffer.h"
+	"../screen_buffer/screen_buffer.h"
+	"../customization/customization.h"
+
+1631443658 d:\work\interfaces\interfaces\textreader\defines.h
+	"windows.h"
+
+1631443653 d:\work\interfaces\interfaces\textreader\input_buffer\input_buffer.h
+	"../defines.h"
+
+1631444079 d:\work\interfaces\interfaces\textreader\screen_buffer\screen_buffer.h
+	"../defines.h"
+	"../customization/customization.h"
+	"../input_buffer/input_buffer.h"
+
+1631445153 d:\work\interfaces\interfaces\textreader\customization\customization.h
+	"../defines.h"
+
+1631445916 source:d:\work\interfaces\interfaces\textreader\customization\customization.c
+	"customization.h"
+
+1631443802 source:d:\work\interfaces\interfaces\textreader\input_buffer\input_buffer.c
+	<stdio.h>
+	"input_buffer.h"
+
+1631445891 source:d:\work\interfaces\interfaces\textreader\screen_buffer\screen_buffer.c
+	"screen_buffer.h"
+

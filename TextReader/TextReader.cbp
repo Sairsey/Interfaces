@@ -38,25 +38,23 @@
 			<Add library="kernel32" />
 			<Add library="comctl32" />
 		</Linker>
-		<Unit filename="file_support/file_support.c">
+		<Unit filename="customization/customization.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="file_support/file_support.h" />
-		<Unit filename="globals/global.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="customization/customization.h" />
+		<Unit filename="defines.h" />
 		<Unit filename="globals/global.h" />
+		<Unit filename="input_buffer/input_buffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="input_buffer/input_buffer.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="string_support/string_support.c">
+		<Unit filename="screen_buffer/screen_buffer.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="string_support/string_support.h" />
-		<Unit filename="ui/ui.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="ui/ui.h" />
+		<Unit filename="screen_buffer/screen_buffer.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

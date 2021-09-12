@@ -7,11 +7,20 @@
 #include <tchar.h>
 #include <windows.h>
 
-#include "ui/ui.h"
 #include "globals/global.h"
-#include "file_support/file_support.h"
-#include "string_support/string_support.h"
 
+#include <stdio.h>
+#include <stdarg.h>
+
+void MyDebugMessage(const char *format, ...)
+{
+#ifdef MY_DEBUG
+    va_list arglist;
+    va_start (arglist, format);
+    vprintf( format, arglist );
+    va_end( arglist );
+#endif
+}
 
 /*  Declare Windows procedure  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -29,7 +38,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     wincl.hInstance = hThisInstance;
     wincl.lpszClassName = _T("VParusovInterface");
     wincl.lpfnWndProc = WindowProcedure;      /* This function is called by windows */
-    wincl.style = CS_DBLCLKS;                 /* Catch double-clicks */
+    wincl.style = CS_DBLCLKS | CS_CLASSDC | CS_OWNDC; /* Catch double-clicks and request own DC*/
     wincl.cbSize = sizeof (WNDCLASSEX);
 
     /* Use default icon and mouse-pointer */
@@ -90,25 +99,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             {
                 CREATESTRUCT *OurCreateStruct = (CREATESTRUCT *)lParam;
                 MyDebugMessage("WM_Create\n");
-                Globals.HWnd = hwnd;
                 Globals.hInstanse = OurCreateStruct->hInstance;
 
                 // just like VS2017
-                Globals.BackRed = 30;
-                Globals.BackBlue = 30;
-                Globals.BackGreen = 30;
-                Globals.TextRed = 255;
-                Globals.TextBlue = 255;
-                Globals.TextGreen = 255;
 
-                Globals.LineHeight = 32;
+                CustomisationSetDefault(hwnd, &Globals.Customization);
+                InputBufferInit(&Globals.LoadedBuffer);
+                ScreenBufferInit(&Globals.DrawBuffer);
 
-                // Create font I like
-                Globals.hFont = CreateFont(Globals.LineHeight, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Comic Sans MS"));
-
-                FillFontData(&Globals);
-
-                if (MyReadFile(OurCreateStruct->lpCreateParams, &Globals))
+                if (InputBufferReadBuffer(OurCreateStruct->lpCreateParams, &Globals.LoadedBuffer))
                 {
                     Globals.IsInited = TRUE;
                 }
@@ -120,8 +119,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             {
                 Globals.WindowWidth = LOWORD(lParam);
                 Globals.WindowHeight = HIWORD(lParam);
-                ClearDrawStrings(&Globals);
-                BuildDrawStrings(&Globals);
+                ScreenBufferClear(&Globals.DrawBuffer);
+                ScreenBufferBuild(&Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
                 InvalidateRect(hwnd, NULL, TRUE);
                 MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
             }
@@ -130,14 +129,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             MyDebugMessage("WM_Paint\n");
             if (Globals.IsInited)
             {
-                DrawTextOnScreen(&Globals);
+                ScreenBufferDraw(hwnd, &Globals.DrawBuffer, &Globals.Customization.Font);
             }
             break;
         case WM_DESTROY:
             if (Globals.IsInited)
             {
-                SafeDelete(Globals.LoadedBuffer);
-                DeleteObject(Globals.hFont);
+                InputBufferClear(&Globals.LoadedBuffer);
+                ScreenBufferClear(&Globals.DrawBuffer);
+                CustomisationClear(&Globals.Customization);
             }
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
             break;
