@@ -1,27 +1,37 @@
 #include "screen_buffer.h"
+#include "math.h"
 
 void ScreenBufferInit(screen_buffer *buffer)
 {
     buffer->Data = NULL;
+    buffer->Lengths = NULL;
     buffer->Size = 0;
+    buffer->ScrollH = 0;
+    buffer->ViewMode = FORMATTED;
+    buffer->WindowHeightInLines = 0;
 }
 
 void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params *font, long window_width, long window_height)
 {
-    char *tmp_buffer = NULL;
-    int CurY = 0;
-    int LoadedBufferIndex = 0;
-    int tmp_buffer_len = window_width / font->MinSymbolWidth;
-    if (tmp_buffer_len == 0)
+    int CurY = 0;              // current line in out_buf
+    int screen_buffer_len = 0; // maximum length of line on screen
+    int input_buffer_line = 0; // index of line in in_buf
+    int i;
+
+    if (out_buf->ViewMode == FORMATTED)
+        screen_buffer_len = window_width / font->MinSymbolWidth;
+    else
+        screen_buffer_len = in_buf->MaxLineLength;
+
+    if (screen_buffer_len == 0)
     {
-        tmp_buffer_len = 1;
+        screen_buffer_len = 1;
     }
 
-    out_buf->Size = window_height / font->BaselineToBaseline;
-    if (out_buf->Size == 0)
-    {
-        out_buf->Size = 1;
-    }
+    // lets count out_buf->Size
+    out_buf->Size = 0;
+    for (i = 0; i < in_buf->NumberOfLines; i++)
+        out_buf->Size += CustomisationGetTextLineScreenLines(font, in_buf->Lines[i], window_width);
 
     out_buf->Data = malloc(sizeof(char *) * out_buf->Size);
     if (!out_buf->Data)
@@ -30,59 +40,83 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
         return;
     }
 
-    tmp_buffer = malloc(sizeof(char) * (tmp_buffer_len + 1));
-    if (!tmp_buffer)
+    out_buf->Lengths = malloc(sizeof(unsigned long) * out_buf->Size);
+    if (!out_buf->Lengths)
     {
-        MyDebugMessage("Cannot allocate buffer...\n");
         free(out_buf->Data);
         out_buf->Data = NULL;
-        out_buf->Size = 0;
+        MyDebugMessage("Cannot allocate buffer...\n");
         return;
     }
 
     // main logic here
-    for (CurY = 0; CurY < out_buf->Size; CurY++)
+    // for every line in in_buf
+    CurY = 0;
+    for (input_buffer_line = 0; input_buffer_line < in_buf->NumberOfLines; input_buffer_line++)
     {
-        int CurWidth = 0, CurX = 0; // cur line width in pixels
-        // zeros
-        memset(tmp_buffer, 0, tmp_buffer_len + 1);
-        while (CurX < tmp_buffer_len &&   // not out of tmp_buffer
-               LoadedBufferIndex < in_buf->Size && // not out of LoadedBuffer
-               in_buf->Data[LoadedBufferIndex] != '\n' && // not new line
-               CurWidth + font->SymbolWidth[(unsigned char )in_buf->Data[LoadedBufferIndex]] < window_width // not out of screen
-               )
+        char *line_element = in_buf->Lines[input_buffer_line];
+        char *screen_line_start_element = in_buf->Lines[input_buffer_line];
+        unsigned long screen_line_element_index = 0;
+        unsigned long screen_line_width = 0;
+
+        // check if it is empty line
+        if (*line_element == 0)
         {
-            tmp_buffer[CurX] = in_buf->Data[LoadedBufferIndex];
-            CurWidth += font->SymbolWidth[(unsigned char )in_buf->Data[LoadedBufferIndex]];
-            CurX++;
-            LoadedBufferIndex++;
+            out_buf->Data[CurY] = line_element;
+            out_buf->Lengths[CurY++] = 0;
+            continue;
         }
 
-        if (in_buf->Data[LoadedBufferIndex] == '\n')
-            LoadedBufferIndex++;
-
-        out_buf->Data[CurY] = malloc(sizeof(char) * (CurX + 1));
-        if (!out_buf->Data[CurY])
+        // for every element in our line
+        for (;*line_element != 0; line_element++)
         {
-            MyDebugMessage("Apchih-ba\n");
-            out_buf->Data = NULL;
-            return;
+            if (screen_line_element_index < screen_buffer_len && // if we not out of screen_buffer_len
+                (out_buf->ViewMode == UNFORMATTED  // if unformatted
+                || (out_buf->ViewMode == FORMATTED && screen_line_width + font->SymbolWidth[(unsigned char )*line_element] < window_width))) // or formatted but have enough space
+            {
+                screen_line_element_index++;
+                screen_line_width += font->SymbolWidth[(unsigned char )*line_element];
+            }
+            else // copy tmp_buffer to out_buf and memset new one
+            {
+                out_buf->Data[CurY] = screen_line_start_element;
+                out_buf->Lengths[CurY++] = screen_line_element_index;
+                screen_line_start_element = line_element;
+                screen_line_element_index = 0;
+                screen_line_width = 0;
+                line_element--;      // still load symbol
+            }
         }
-        memcpy(out_buf->Data[CurY], tmp_buffer, CurX + 1);
+
+        if (screen_line_element_index != 0)
+        {
+            out_buf->Data[CurY] = screen_line_start_element;
+            out_buf->Lengths[CurY++] = screen_line_element_index;
+        }
     }
+
+    out_buf->WindowHeightInLines = window_height / font->BaselineToBaseline;
+    if (out_buf->WindowHeightInLines == 0)
+        out_buf->WindowHeightInLines = 1;
+
 }
 
 void ScreenBufferClear(screen_buffer *buffer)
 {
     if (buffer->Data)
     {
-        int i = 0;
-        for (i = 0; i < buffer->Size; i++)
-            free(buffer->Data[i]);
         free(buffer->Data);
         buffer->Data = NULL;
     }
+    if (buffer->Lengths)
+    {
+        free(buffer->Lengths);
+        buffer->Lengths = NULL;
+    }
+    buffer->ScrollH = 0;
+    buffer->ViewMode = FORMATTED;
     buffer->Size = 0;
+    buffer->WindowHeightInLines = 0;
 }
 
 void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
@@ -91,6 +125,7 @@ void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
     PAINTSTRUCT PaintStruct;
     hDC = BeginPaint(hwnd, &PaintStruct);
     RECT ScreenRect;  // Client rect
+
 
     if (buffer == NULL || buffer->Data == NULL)
     {
@@ -101,10 +136,10 @@ void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
     // Get client area size
     GetClientRect(hwnd, &ScreenRect);
 
-    for (int i = 0; i < buffer->Size; i++)
+    for (int i = 0; i < buffer->WindowHeightInLines; i++)
     {
-        int len = strlen(buffer->Data[i]);
-        TextOut(hDC, ScreenRect.left, ScreenRect.top + i * font->BaselineToBaseline, buffer->Data[i], len);
+        int len = buffer->Lengths[i];
+        TextOut(hDC, ScreenRect.left, ScreenRect.top + i * font->BaselineToBaseline, buffer->Data[i + buffer->ScrollH], len);
     }
 
     EndPaint(hwnd, &PaintStruct);

@@ -24,6 +24,34 @@ void CustomisationClear(customization_params *custom)
     DeleteObject(custom->BackgroundBrush);
 }
 
+unsigned long CustomisationGetLineWidth(font_params *font, char *line)
+{
+    unsigned long tmp = 0;
+    for (; *line != 0; line++)
+        tmp += font->SymbolWidth[(unsigned char)*line];
+    return tmp;
+}
+
+unsigned long CustomisationGetTextLineScreenLines(font_params *font, char *line, unsigned long window_width)
+{
+    unsigned long tmp = 1;
+    unsigned long current_width = 0;
+    for (; *line != 0; line++)
+    {
+        if (current_width + font->SymbolWidth[(unsigned char)*line] < window_width)
+        {
+            current_width += font->SymbolWidth[(unsigned char)*line];
+        }
+        else
+        {
+            current_width = font->SymbolWidth[(unsigned char)*line];
+            tmp++;
+        }
+    }
+    return tmp;
+}
+
+
 void CustomisationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
 {
     if (font->hFont == NULL)

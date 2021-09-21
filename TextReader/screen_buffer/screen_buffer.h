@@ -5,10 +5,20 @@
 #include "../input_buffer/input_buffer.h"
 
 
+typedef enum
+{
+    FORMATTED = 0,  // No X-coord scrolling
+    UNFORMATTED    // X-coord scrolling possible
+} mode;
+
 typedef struct
 {
-    char **Data;  // lines
-    int Size;     // number of lines
+    char **Data;            // lines (as pointers in input_buffer->Data)
+    unsigned long *Lengths; // length of every line
+    unsigned long Size;     // number of lines
+    unsigned long ScrollH;  // Scroll over Y coord
+    mode ViewMode;          // mode of view
+    unsigned long WindowHeightInLines; // Height of window in lines;
 } screen_buffer;
 
 void ScreenBufferInit(screen_buffer *buffer);
