@@ -7,7 +7,7 @@ typedef struct
     HFONT hFont; // my font
     unsigned long LineHeight; // size of font actually
     unsigned long BaselineToBaseline; // distance from baseline to baseline
-    unsigned long SymbolWidth[256]; // Table that contains symbols width (for non-monospace fonts)
+    int SymbolWidth[256]; // Table that contains symbols width (for non-monospace fonts)
     unsigned long MinSymbolWidth;  // For determining maximum line width in characters
 } font_params;
 

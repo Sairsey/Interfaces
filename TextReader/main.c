@@ -83,6 +83,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
         DispatchMessage(&messages);
     }
 
+    _CrtDumpMemoryLeaks();
     /* The program return-value is 0 - The value that PostQuitMessage() gave */
     return messages.wParam;
 }

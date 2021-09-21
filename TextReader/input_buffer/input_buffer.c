@@ -30,13 +30,15 @@ bool InputBufferReadBuffer(const char *filename, input_buffer *buffer)
         MyDebugMessage("Cannot allocate memory\n");
         return FALSE;
     }
+
+    // update size
+    buffer->Size = fread(buffer->Data, sizeof(char), buffer->Size, F);
     buffer->Data[buffer->Size] = 0;
 
-    fread(buffer->Data, sizeof(char), buffer->Size, F);
     fclose(F);
 
     // split data on lines
-    buffer->NumberOfLines = 0;
+    buffer->NumberOfLines = 1;
 
     for (tmp = buffer->Data; *tmp != 0; tmp++)
         if (*tmp == '\n')

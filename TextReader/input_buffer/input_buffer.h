@@ -8,7 +8,7 @@ typedef struct
     unsigned long Size;  // number of characters
     char **Lines;         // pointers on every file Line
     unsigned long NumberOfLines; // Number of lines
-    unsigned long MaxLineLength  // Maximum line length
+    unsigned long MaxLineLength;  // Maximum line length
 } input_buffer;
 
 void InputBufferInit(input_buffer *buffer);

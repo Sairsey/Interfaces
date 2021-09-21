@@ -68,7 +68,6 @@ void CustomisationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
         HDC hDC; // Drawable Context
         long OutlineMetricSize;
         OUTLINETEXTMETRIC *OutlineMetric;
-        TEXTMETRIC TextMetric;
         int i;
 
         hDC = GetDC(hwnd);
@@ -86,7 +85,7 @@ void CustomisationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
 
         for (i = 0; i < 256; i++)
         {
-            GetCharWidth32(hDC, i, i, font->SymbolWidth + i);
+            GetCharWidth32(hDC, i, i, &(font->SymbolWidth[i]));
         }
 
         font->MinSymbolWidth = font->SymbolWidth[0];
