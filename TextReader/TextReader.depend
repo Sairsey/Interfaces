@@ -20,7 +20,7 @@
 1630942296 e:\github\interfaces\textreader\file_support\file_support.h
 	"../globals/global.h"
 
-1631558415 source:e:\github\interfaces\textreader\main.c
+1632253628 source:e:\github\interfaces\textreader\main.c
 	<tchar.h>
 	<windows.h>
 	"globals/global.h"
@@ -99,7 +99,7 @@
 	"../customization/customization.h"
 	"../input_buffer/input_buffer.h"
 
-1632250428 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
+1632253657 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
 	"screen_buffer.h"
 	"math.h"
 

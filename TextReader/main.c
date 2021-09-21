@@ -60,7 +60,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
            0,                   /* Extended possibilites for variation */
            _T("VParusovInterface"),/* Classname */
            _T("TextReader"),       /* Title Text */
-           WS_OVERLAPPEDWINDOW, /* default window */
+           WS_OVERLAPPEDWINDOW | WS_VSCROLL, /* default window */
            CW_USEDEFAULT,       /* Windows decides the position */
            CW_USEDEFAULT,       /* where the window ends up on the screen */
            CW_USEDEFAULT,       /* The programs width */
@@ -115,12 +115,33 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             break;
         case WM_SIZE:
             MyDebugMessage("WM_Size\n");
-            if (Globals.IsInited)
+            if (!Globals.IsInited)
             {
+                break;
+            }
+            {
+                long v_scroll_pos = Globals.DrawBuffer.ScrollH;
                 Globals.WindowWidth = LOWORD(lParam);
                 Globals.WindowHeight = HIWORD(lParam);
+
+
                 ScreenBufferClear(&Globals.DrawBuffer);
                 ScreenBufferBuild(&Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
+
+                Globals.DrawBuffer.ScrollH = v_scroll_pos;
+                // set scroll params
+                if (Globals.DrawBuffer.WindowHeightInLines > Globals.DrawBuffer.Size)
+                {
+                    ShowScrollBar(hwnd, SB_VERT, FALSE);
+                }
+                else
+                {
+                    ShowScrollBar(hwnd, SB_VERT, TRUE);
+                    SetScrollRange(hwnd, SB_VERT, 0, Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines, FALSE);
+                    if (Globals.DrawBuffer.ScrollH > Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines)
+                        Globals.DrawBuffer.ScrollH = Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines;
+                    SetScrollPos(hwnd, SB_VERT, Globals.DrawBuffer.ScrollH, TRUE);
+                }
                 InvalidateRect(hwnd, NULL, TRUE);
                 MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
             }
@@ -130,6 +151,42 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             if (Globals.IsInited)
             {
                 ScreenBufferDraw(hwnd, &Globals.DrawBuffer, &Globals.Customization.Font);
+            }
+            break;
+        case WM_VSCROLL:
+            if (!Globals.IsInited)
+                break;
+            else
+            {
+                int action = LOWORD(wParam);
+                int pos = 0;
+
+                if (action == SB_THUMBPOSITION || action == SB_THUMBTRACK)
+                {
+                    pos = HIWORD(wParam);
+                }
+                else if (action == SB_LINEDOWN)
+                {
+                    pos = Globals.DrawBuffer.ScrollH + 1;
+                }
+                else if (action == SB_LINEUP)
+                {
+                    if (Globals.DrawBuffer.ScrollH > 0)
+                        pos = Globals.DrawBuffer.ScrollH - 1;
+                    else
+                        pos = 0;
+                }
+                else
+                    break;
+
+                if (pos == -1)
+                    break;
+
+                Globals.DrawBuffer.ScrollH = pos;
+                if (Globals.DrawBuffer.ScrollH > Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines)
+                    Globals.DrawBuffer.ScrollH = Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines;
+                InvalidateRect(hwnd, NULL, TRUE);
+                SetScrollPos(hwnd, SB_VERT, Globals.DrawBuffer.ScrollH, TRUE);
             }
             break;
         case WM_DESTROY:

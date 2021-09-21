@@ -138,7 +138,7 @@ void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
 
     for (int i = 0; i < buffer->WindowHeightInLines; i++)
     {
-        int len = buffer->Lengths[i];
+        int len = buffer->Lengths[i + buffer->ScrollH];
         TextOut(hDC, ScreenRect.left, ScreenRect.top + i * font->BaselineToBaseline, buffer->Data[i + buffer->ScrollH], len);
     }
 
