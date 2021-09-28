@@ -120,30 +120,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             {
                 break;
             }
+
             {
-                long v_scroll_pos = Globals.DrawBuffer.ScrollH;
                 Globals.WindowWidth = LOWORD(lParam);
                 Globals.WindowHeight = HIWORD(lParam);
 
-
-                ScreenBufferClear(&Globals.DrawBuffer);
-                ScreenBufferBuild(&Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
-
-                Globals.DrawBuffer.ScrollH = v_scroll_pos;
-                // set scroll params
-                if (Globals.DrawBuffer.WindowHeightInLines > Globals.DrawBuffer.Size)
-                {
-                    ShowScrollBar(hwnd, SB_VERT, FALSE);
-                }
-                else
-                {
-                    ShowScrollBar(hwnd, SB_VERT, TRUE);
-                    SetScrollRange(hwnd, SB_VERT, 0, Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines, FALSE);
-                    if (Globals.DrawBuffer.ScrollH > Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines)
-                        Globals.DrawBuffer.ScrollH = Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines;
-                    SetScrollPos(hwnd, SB_VERT, Globals.DrawBuffer.ScrollH, TRUE);
-                }
-                InvalidateRect(hwnd, NULL, TRUE);
+                ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
                 MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
             }
             break;
@@ -157,37 +139,96 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_VSCROLL:
             if (!Globals.IsInited)
                 break;
-            else
+
             {
-                int action = LOWORD(wParam);
-                int pos = 0;
+                switch (LOWORD(wParam))
+                {
+                    case SB_THUMBPOSITION:
+                    case SB_THUMBTRACK:
+                        ScreenBufferSetVScroll(hwnd, &Globals.DrawBuffer, HIWORD(wParam));
+                        break;
+                    case SB_LINEDOWN:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
+                        break;
+                    case SB_LINEUP:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            break;
+        case WM_HSCROLL:
+            if (!Globals.IsInited)
+                break;
 
-                if (action == SB_THUMBPOSITION || action == SB_THUMBTRACK)
+            {
+                switch (LOWORD(wParam))
                 {
-                    pos = HIWORD(wParam);
+                    case SB_THUMBPOSITION:
+                    case SB_THUMBTRACK:
+                        ScreenBufferSetHScroll(hwnd, &Globals.DrawBuffer, HIWORD(wParam));
+                        break;
+                    case SB_LINEDOWN:
+                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
+                        break;
+                    case SB_LINEUP:
+                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
+                        break;
+                    default:
+                        break;
                 }
-                else if (action == SB_LINEDOWN)
-                {
-                    pos = Globals.DrawBuffer.ScrollH + 1;
-                }
-                else if (action == SB_LINEUP)
-                {
-                    if (Globals.DrawBuffer.ScrollH > 0)
-                        pos = Globals.DrawBuffer.ScrollH - 1;
-                    else
-                        pos = 0;
-                }
-                else
+            }
+            break;
+        case WM_MOUSEWHEEL:
+            if (!Globals.IsInited)
+                break;
+            {
+                long zDelta = -GET_WHEEL_DELTA_WPARAM(wParam) / 120;
+                ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer,LITTLE_VSCROLL * zDelta);
+            }
+            break;
+        case WM_KEYDOWN:
+            if (!Globals.IsInited)
+                break;
+
+            {
+                static DWORD prev_key = -1;
+                static clock_t prev_time = 0;
+                clock_t cur_time = clock();
+
+                if (prev_key == wParam && cur_time - prev_time <= HOLD_DELAY)
                     break;
 
-                if (pos == -1)
-                    break;
+                prev_key = wParam;
+                prev_time = cur_time;
 
-                Globals.DrawBuffer.ScrollH = pos;
-                if (Globals.DrawBuffer.ScrollH > Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines)
-                    Globals.DrawBuffer.ScrollH = Globals.DrawBuffer.Size - Globals.DrawBuffer.WindowHeightInLines;
-                InvalidateRect(hwnd, NULL, TRUE);
-                SetScrollPos(hwnd, SB_VERT, Globals.DrawBuffer.ScrollH, TRUE);
+                switch (wParam)
+                {
+                    case VK_UP:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -LITTLE_VSCROLL);
+                        break;
+                    case VK_DOWN:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
+                        break;
+                    case VK_LEFT:
+                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, -LITTLE_HSCROLL);
+                        break;
+                    case VK_RIGHT:
+                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
+                        break;
+                    case VK_PRIOR:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -BIG_VSCROLL);
+                        break;
+                    case VK_NEXT:
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, BIG_VSCROLL);
+                        break;
+                    case VK_SPACE: // dirty hack, remove sometime in future
+                        Globals.DrawBuffer.ViewMode = !Globals.DrawBuffer.ViewMode;
+                        ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
+                    default:
+                        break;
+                }
             }
             break;
         case WM_DESTROY:

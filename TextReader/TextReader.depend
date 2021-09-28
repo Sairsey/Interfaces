@@ -20,7 +20,7 @@
 1630942296 e:\github\interfaces\textreader\file_support\file_support.h
 	"../globals/global.h"
 
-1632254879 source:e:\github\interfaces\textreader\main.c
+1632866963 source:e:\github\interfaces\textreader\main.c
 	<tchar.h>
 	<windows.h>
 	"globals/global.h"
@@ -84,9 +84,10 @@
 1632255127 e:\github\interfaces\textreader\customization\customization.h
 	"../defines.h"
 
-1632254922 e:\github\interfaces\textreader\defines.h
+1632866156 e:\github\interfaces\textreader\defines.h
 	<stdlib.h>
 	<crtdbg.h>
+	<time.h>
 	"windows.h"
 
 1632255764 source:e:\github\interfaces\textreader\input_buffer\input_buffer.c
@@ -96,12 +97,12 @@
 1632254968 e:\github\interfaces\textreader\input_buffer\input_buffer.h
 	"../defines.h"
 
-1632249917 e:\github\interfaces\textreader\screen_buffer\screen_buffer.h
+1632867275 e:\github\interfaces\textreader\screen_buffer\screen_buffer.h
 	"../defines.h"
 	"../customization/customization.h"
 	"../input_buffer/input_buffer.h"
 
-1632253657 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
+1632866634 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
 	"screen_buffer.h"
 	"math.h"
 
