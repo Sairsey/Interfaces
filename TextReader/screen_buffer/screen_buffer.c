@@ -147,7 +147,7 @@ void ScreenBufferResize(HWND hwnd, input_buffer *in_buf, screen_buffer *out_buf,
     {
         ShowScrollBar(hwnd, SB_HORZ, TRUE);
         SetScrollRange(hwnd, SB_HORZ, 0, out_buf->MaxLineLength, FALSE);
-        ScreenBufferSetVScroll(hwnd, out_buf, h_scroll_pos);
+        ScreenBufferSetHScroll(hwnd, out_buf, h_scroll_pos);
     }
     InvalidateRect(hwnd, NULL, TRUE);
 }
@@ -158,6 +158,7 @@ void ScreenBufferSetVScroll(HWND hwnd, screen_buffer *out_buf, unsigned long pos
     if (pos == -1)
         return;
 
+    MyDebugMessage("VScroll %i to %i", out_buf->ScrollV, pos);
     out_buf->ScrollV = pos;
     if (out_buf->ScrollV > out_buf->Size - out_buf->WindowHeightInLines)
         out_buf->ScrollV = out_buf->Size - out_buf->WindowHeightInLines;
