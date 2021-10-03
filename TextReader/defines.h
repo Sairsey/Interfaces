@@ -9,7 +9,7 @@
 #include "windows.h"
 
 // flag for enabling logging
-#define MY_DEBUG
+//#define MY_DEBUG
 
 #define TRUE 1
 #define FALSE 0

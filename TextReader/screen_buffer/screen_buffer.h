@@ -14,10 +14,9 @@ typedef enum
 typedef struct
 {
     char **Data;            // lines (as pointers in input_buffer->Data)
-    unsigned long *Lengths; // length of every line
     unsigned long Size;     // number of lines
     unsigned long ScrollV;  // Scroll over Y coord
-    unsigned long ScrollH;  // Scroll over W coord
+    unsigned long ScrollH;  // Scroll over X coord
     mode ViewMode;          // mode of view
     unsigned long WindowHeightInLines; // Height of window in lines;
     unsigned long WindowWidthInMinSymbols; // Width of window as number of symbols with min width, that could fit;

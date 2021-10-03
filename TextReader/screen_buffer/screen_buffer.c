@@ -4,7 +4,6 @@
 void ScreenBufferInit(screen_buffer *buffer)
 {
     buffer->Data = NULL;
-    buffer->Lengths = NULL;
     buffer->Size = 0;
     buffer->ScrollH = 0;
     buffer->ScrollV = 0;
@@ -16,11 +15,10 @@ void ScreenBufferInit(screen_buffer *buffer)
 
 void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params *font, long window_width, long window_height)
 {
-    int CurY = 0;              // current line in out_buf
-    int screen_buffer_len = 0; // maximum length of line on screen
-    int input_buffer_line = 0; // index of line in in_buf
-    int i;
-
+    unsigned long CurY = 0;              // current line in out_buf
+    unsigned long screen_buffer_len = 0; // maximum length of line on screen
+    unsigned long input_buffer_line = 0; // index of line in in_buf
+    unsigned long i;
 
     screen_buffer_len = window_width / font->MinSymbolWidth;
 
@@ -55,15 +53,6 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
         return;
     }
 
-    out_buf->Lengths = malloc(sizeof(unsigned long) * out_buf->Size);
-    if (!out_buf->Lengths)
-    {
-        free(out_buf->Data);
-        out_buf->Data = NULL;
-        MyDebugMessage("Cannot allocate buffer...\n");
-        return;
-    }
-
     // main logic here
     // for every line in in_buf
     CurY = 0;
@@ -77,8 +66,7 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
         // check if it is empty line
         if (*line_element == 0)
         {
-            out_buf->Data[CurY] = line_element;
-            out_buf->Lengths[CurY++] = 0;
+            out_buf->Data[CurY++] = line_element;
             continue;
         }
 
@@ -94,8 +82,7 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
             }
             else // copy tmp_buffer to out_buf and memset new one
             {
-                out_buf->Data[CurY] = screen_line_start_element;
-                out_buf->Lengths[CurY++] = screen_line_element_index;
+                out_buf->Data[CurY++] = screen_line_start_element;
                 screen_line_start_element = line_element;
                 screen_line_element_index = 0;
                 screen_line_width = 0;
@@ -105,8 +92,7 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
 
         if (screen_line_element_index != 0)
         {
-            out_buf->Data[CurY] = screen_line_start_element;
-            out_buf->Lengths[CurY++] = screen_line_element_index;
+            out_buf->Data[CurY++] = screen_line_start_element;
         }
     }
 
@@ -118,14 +104,41 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
 
 void ScreenBufferResize(HWND hwnd, input_buffer *in_buf, screen_buffer *out_buf, font_params *font, long window_width, long window_height)
 {
+    char *upper_left_symbol = NULL;
+    mode format_state = out_buf->ViewMode;
     unsigned long v_scroll_pos = out_buf->ScrollV;
     unsigned long h_scroll_pos = out_buf->ScrollH;
-    mode format_state = out_buf->ViewMode;
+
+    if (out_buf->Data != NULL)
+        upper_left_symbol = out_buf->Data[out_buf->ScrollV] + out_buf->ScrollH;
 
     ScreenBufferClear(out_buf);
 
     out_buf->ViewMode = format_state;
     ScreenBufferBuild(in_buf, out_buf, font, window_width, window_height);
+
+    // Putting scroll in right place.
+    if (upper_left_symbol != NULL)
+    {
+        unsigned long r = out_buf->Size;
+        unsigned long l = 0;
+        // binary search for finding right position in text. log(75000) isn`t that big
+        while (TRU)
+        {
+            v_scroll_pos = (r - l) / 2 + l;
+            if (upper_left_symbol - out_buf->Data[v_scroll_pos] >
+               out_buf->Data[v_scroll_pos + 1] - out_buf->Data[v_scroll_pos] - 1)
+               l = v_scroll_pos + 1;
+            else if (out_buf->Data[v_scroll_pos] - upper_left_symbol > 0)
+                r = v_scroll_pos - 1;
+            else
+                break;
+        }
+
+        // if we need to place h_scroll_pos correctly
+        if (out_buf->ViewMode == UNFORMATTED)
+            h_scroll_pos =  upper_left_symbol - out_buf->Data[v_scroll_pos];
+    }
 
     // set scroll params
     if (out_buf->WindowHeightInLines > out_buf->Size)
@@ -204,11 +217,6 @@ void ScreenBufferClear(screen_buffer *buffer)
         free(buffer->Data);
         buffer->Data = NULL;
     }
-    if (buffer->Lengths)
-    {
-        free(buffer->Lengths);
-        buffer->Lengths = NULL;
-    }
     buffer->ScrollH = 0;
     buffer->ScrollV = 0;
     buffer->ViewMode = FORMATTED;
@@ -237,8 +245,14 @@ void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
 
     for (int i = 0; i < buffer->WindowHeightInLines; i++)
     {
-        int len = buffer->Lengths[i + buffer->ScrollV] - buffer->ScrollH;
-        TextOut(hDC, ScreenRect.left, ScreenRect.top + i * font->BaselineToBaseline, &buffer->Data[i + buffer->ScrollV][buffer->ScrollH], len);
+        unsigned long line_index = i + buffer->ScrollV;
+        int len = buffer->MaxLineLength;
+
+        if (line_index != buffer->Size)
+            len = buffer->Data[line_index + 1] - buffer->Data[line_index];
+
+        len -= buffer->ScrollH;
+        TextOut(hDC, ScreenRect.left, ScreenRect.top + i * font->BaselineToBaseline, &buffer->Data[line_index][buffer->ScrollH], len);
     }
 
     EndPaint(hwnd, &PaintStruct);

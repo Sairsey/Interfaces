@@ -51,6 +51,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="menu.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="menu_defines.h" />
 		<Unit filename="screen_buffer/screen_buffer.c">
 			<Option compilerVar="CC" />
 		</Unit>

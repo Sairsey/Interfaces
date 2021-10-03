@@ -21,7 +21,7 @@ typedef struct tag_global_data
     screen_buffer DrawBuffer; // view
 
     long WindowWidth;      // Width of window
-    long WindowHeight;     // Width of window
+    long WindowHeight;     // Height of window
     HINSTANCE hInstanse;   // Handle Instance
 
     customization_params Customization; // parameters of customizations

@@ -7,6 +7,7 @@
 #include <tchar.h>
 #include <windows.h>
 
+#include "menu_defines.h"
 #include "globals/global.h"
 
 #include <stdio.h>
@@ -45,7 +46,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);
     wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
     wincl.hCursor = LoadCursor (NULL, IDC_ARROW);
-    wincl.lpszMenuName = NULL;                 /* No menu */
+    wincl.lpszMenuName = MAKEINTRESOURCE(ID_MYMENU);
     wincl.cbClsExtra = 0;                      /* No extra bytes after the window class */
     wincl.cbWndExtra = 0;                      /* structure or the window instance */
     /* Use Windows's default color as the background of the window */
@@ -103,7 +104,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 Globals.hInstanse = OurCreateStruct->hInstance;
 
                 // just like VS2017
-
                 CustomisationSetDefault(hwnd, &Globals.Customization);
                 InputBufferInit(&Globals.LoadedBuffer);
                 ScreenBufferInit(&Globals.DrawBuffer);
@@ -151,7 +151,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                         ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
                         break;
                     case SB_LINEUP:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
+                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -LITTLE_VSCROLL);
                         break;
                     default:
                         break;
@@ -223,9 +223,39 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     case VK_NEXT:
                         ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, BIG_VSCROLL);
                         break;
-                    case VK_SPACE: // dirty hack, remove sometime in future
-                        Globals.DrawBuffer.ViewMode = !Globals.DrawBuffer.ViewMode;
-                        ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
+                    default:
+                        break;
+                }
+            }
+            break;
+        case WM_COMMAND:
+            if (!Globals.IsInited)
+                break;
+            {
+                switch (LOWORD(wParam))
+                {
+                    case IDM_ABOUT:
+                        MessageBox(hwnd, "Made by Vladimir Parusov\n"
+                                   "5030102/90201 group\n"
+                                   "Year 2021", "About", MB_OK);
+                        break;
+                    case IDM_VIEW_WRAP:
+                        {
+                            DWORD state ;
+                            state = GetMenuState(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND);
+                            if (state & MF_CHECKED)
+                            {
+                                CheckMenuItem(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND | MF_UNCHECKED);
+                                Globals.DrawBuffer.ViewMode = UNFORMATTED;
+                            }
+                            else
+                            {
+                                CheckMenuItem(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND | MF_CHECKED);
+                                Globals.DrawBuffer.ViewMode = FORMATTED;
+                            }
+                            ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
+                        }
+                        break;
                     default:
                         break;
                 }
