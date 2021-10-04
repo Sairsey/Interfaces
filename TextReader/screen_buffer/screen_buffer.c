@@ -1,6 +1,11 @@
 #include "screen_buffer.h"
 #include "math.h"
 
+// Initialize screen buffer
+// INPUT:
+//   screen_buffer *buffer - pointer on screen_buffer structure
+// OUTPUT:
+//   screen_buffer *buffer - pointer on screen_buffer structure filled with zero values
 void ScreenBufferInit(screen_buffer *buffer)
 {
     buffer->Data = NULL;
@@ -13,6 +18,15 @@ void ScreenBufferInit(screen_buffer *buffer)
     buffer->WindowWidthInMinSymbols = 0;
 }
 
+// Build screen buffer
+// INPUT:
+//   input_buffer *in_buf - structure with data and metadata from file.
+//   screen_buffer *out_buf - structure with right ViewMode
+//   font_params *font - structure with metadata about current font (width of characters, height and so on)
+//   long window_width, - size of window client area
+//   long window_height - size of window client area
+// OUTPUT:
+//   screen_buffer *out_buf - structure filled with correct data and ready do be used in ScreenBufferDraw
 void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params *font, long window_width, long window_height)
 {
     unsigned long CurY = 0;              // current line in out_buf
@@ -39,7 +53,7 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
     {
         out_buf->Size = 0;
         for (i = 0; i < in_buf->NumberOfLines; i++)
-            out_buf->Size += CustomisationGetTextLineScreenLines(font, in_buf->Lines[i], window_width);
+            out_buf->Size += CustomizationGetTextLineScreenLines(font, in_buf->Lines[i], window_width);
     }
     else
     {
@@ -102,6 +116,16 @@ void ScreenBufferBuild(input_buffer *in_buf, screen_buffer *out_buf, font_params
 
 }
 
+// Rebuild out_buf and apply all settings to scrolls
+// INPUT:
+//   HWND hwnd - window handle for setting scrolling positions
+//   input_buffer *in_buf - structure with data and metadata from file.
+//   screen_buffer *out_buf - structure with right ViewMode and scrolls data
+//   font_params *font - structure with metadata about current font (width of characters, height and so on)
+//   long window_width, - size of window client area
+//   long window_height - size of window client area
+// OUTPUT:
+//   screen_buffer *out_buf - structure filled with correct data and ready do be used in ScreenBufferDraw
 void ScreenBufferResize(HWND hwnd, input_buffer *in_buf, screen_buffer *out_buf, font_params *font, long window_width, long window_height)
 {
     char *upper_left_symbol = NULL;
@@ -165,7 +189,13 @@ void ScreenBufferResize(HWND hwnd, input_buffer *in_buf, screen_buffer *out_buf,
     InvalidateRect(hwnd, NULL, TRUE);
 }
 
-// Set exact position
+// Set position of Vertical Scroll with absolute coordinate
+// INPUT:
+//   HWND hwnd - window handle for setting scrolling positions
+//   screen_buffer *out_buf - structure with right ViewMode and scrolls data
+//   long pos - position of scroll
+// OUTPUT:
+//   screen_buffer *out_buf - structure with correctly modified Scroll info
 void ScreenBufferSetVScroll(HWND hwnd, screen_buffer *out_buf, unsigned long pos)
 {
     if (pos == -1)
@@ -179,7 +209,13 @@ void ScreenBufferSetVScroll(HWND hwnd, screen_buffer *out_buf, unsigned long pos
     SetScrollPos(hwnd, SB_VERT, out_buf->ScrollV, TRUE);
 }
 
-// Set exact position
+// Set position of Horisontal Scroll with absolute coordinate
+// INPUT:
+//   HWND hwnd - window handle for setting scrolling positions
+//   screen_buffer *out_buf - structure with right ViewMode and scrolls data
+//   long pos - position of scroll
+// OUTPUT:
+//   screen_buffer *out_buf - structure with correctly modified Scroll info
 void ScreenBufferSetHScroll(HWND hwnd, screen_buffer *out_buf, unsigned long pos)
 {
     if (pos == -1 || out_buf->ViewMode != UNFORMATTED)
@@ -192,7 +228,13 @@ void ScreenBufferSetHScroll(HWND hwnd, screen_buffer *out_buf, unsigned long pos
     SetScrollPos(hwnd, SB_HORZ, out_buf->ScrollH, TRUE);
 }
 
-// Set position by delta (useful for Mousewheel and buttons)
+// Set position of Vertical Scroll with relative coordinates
+// INPUT:
+//   HWND hwnd - window handle for setting scrolling positions
+//   screen_buffer *out_buf - structure with right ViewMode and scrolls data
+//   long delta - relative to current position of scroll
+// OUTPUT:
+//   screen_buffer *out_buf - structure with correctly modified Scroll info
 void ScreenBufferChangeVScroll(HWND hwnd, screen_buffer *out_buf, long delta)
 {
     // compare as double to avoid all tricks with comparison of signed/unsigned
@@ -201,7 +243,13 @@ void ScreenBufferChangeVScroll(HWND hwnd, screen_buffer *out_buf, long delta)
     ScreenBufferSetVScroll(hwnd, out_buf, out_buf->ScrollV + delta);
 }
 
-// Set position by delta (useful for Mousewheel and buttons)
+// Set position of Horisontal Scroll with relative coordinates
+// INPUT:
+//   HWND hwnd - window handle for setting scrolling positions
+//   screen_buffer *out_buf - structure with right ViewMode and scrolls data
+//   long delta - relative to current position of scroll
+// OUTPUT:
+//   screen_buffer *out_buf - structure with correctly modified Scroll info
 void ScreenBufferChangeHScroll(HWND hwnd, screen_buffer *out_buf, long delta)
 {
     // compare as double to avoid all tricks with comparison of signed/unsigned
@@ -210,6 +258,11 @@ void ScreenBufferChangeHScroll(HWND hwnd, screen_buffer *out_buf, long delta)
     ScreenBufferSetHScroll(hwnd, out_buf, out_buf->ScrollH + delta);
 }
 
+// Clear screen buffer
+// INPUT:
+//   screen_buffer *buffer - pointer on screen_buffer structure
+// OUTPUT:
+//   screen_buffer *buffer - pointer on screen_buffer structure filled with zero values
 void ScreenBufferClear(screen_buffer *buffer)
 {
     if (buffer->Data)
@@ -226,6 +279,11 @@ void ScreenBufferClear(screen_buffer *buffer)
     buffer->WindowWidthInMinSymbols = 0;
 }
 
+// Draw screen_buffer on screen with correct font, ViewMode and scroll with relative coordinates
+// INPUT:
+//   HWND hwnd - window handle for Drawing
+//   screen_buffer *out_buf - structure
+//   font_params *font - parameters of current font
 void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
 {
     HDC hDC;

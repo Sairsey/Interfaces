@@ -1,12 +1,17 @@
 #include "customization.h"
 
-void CustomisationSetDefault(HWND hwnd, customization_params *custom)
+// Initialize customization_params with default variables
+// INPUT:
+//   HWND hwnd - window handle for setting customization
+// OUTPUT:
+//   customization_params *custom - structure filled with default params
+void CustomizationSetDefault(HWND hwnd, customization_params *custom)
 {
     // just like VS2017
     custom->BackgroundColor = RGB(30, 30, 30);
     custom->TextColor = RGB(255, 255, 255);
     custom->Font.hFont = NULL;
-    CustomisationSetFont(hwnd, "Times New Roman", &custom->Font);
+    CustomizationSetFont(hwnd, "Times New Roman", &custom->Font);
 
     // set background and text color
     {
@@ -18,13 +23,24 @@ void CustomisationSetDefault(HWND hwnd, customization_params *custom)
     }
 }
 
-void CustomisationClear(customization_params *custom)
+// Clear customization_params with default variables
+// INPUT:
+//   customization_params *custom - structure filled with some params
+// OUTPUT:
+//   customization_params *custom - structure filled with zero data
+void CustomizationClear(customization_params *custom)
 {
     DeleteObject(custom->Font.hFont);
     DeleteObject(custom->BackgroundBrush);
 }
 
-unsigned long CustomisationGetLineWidth(font_params *font, char *line)
+// Count number of pixels this 0-terminated string will take with current font
+// INPUT:
+//   font_params *font - structure filled with font data
+//   char *line - 0-terminated string
+// OUTPUT:
+//   unsigned long (returned) - Amount of pixels this string will take
+unsigned long CustomizationGetLineWidth(font_params *font, char *line)
 {
     unsigned long tmp = 0;
     for (; *line != 0; line++)
@@ -32,7 +48,14 @@ unsigned long CustomisationGetLineWidth(font_params *font, char *line)
     return tmp;
 }
 
-unsigned long CustomisationGetTextLineScreenLines(font_params *font, char *line, unsigned long window_width)
+// Calculate number of formatted lines this line will take with client area width equal to window_width
+// INPUT:
+//   font_params *font - structure filled with font data
+//   char *line - 0-terminated string
+//   unsigned long window_width - size of window
+// OUTPUT:
+//   unsigned long (returned) - Amount of formatted lines
+unsigned long CustomizationGetTextLineScreenLines(font_params *font, char *line, unsigned long window_width)
 {
     unsigned long tmp = 1;
     unsigned long current_width = 0;
@@ -52,12 +75,17 @@ unsigned long CustomisationGetTextLineScreenLines(font_params *font, char *line,
 }
 
 
-void CustomisationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
+// Set font and fill metadata
+// INPUT:
+//   HWND hwnd - window handle for setting font
+//   TCHAR *font_name - Name of font
+// OUTPUT:
+//   font_params *font - structure with correct metadata
+void CustomizationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
 {
-    if (font->hFont == NULL)
-    {
+    if (font->hFont != NULL)
         DeleteObject(font->hFont);
-    }
+
     font->LineHeight = 32;
 
     // Create font I like
@@ -84,9 +112,7 @@ void CustomisationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
         font->BaselineToBaseline = OutlineMetric->otmMacAscent + OutlineMetric->otmMacDescent + OutlineMetric->otmMacLineGap + 10;
 
         for (i = 0; i < 256; i++)
-        {
             GetCharWidth32(hDC, i, i, &(font->SymbolWidth[i]));
-        }
 
         font->MinSymbolWidth = font->SymbolWidth[0];
 

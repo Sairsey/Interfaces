@@ -8,7 +8,7 @@
 #include <windows.h>
 
 #include "menu_defines.h"
-#include "globals/global.h"
+#include "win_callbacks/win_callbacks.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -91,183 +91,37 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
 
 /*  This function is called by the Windows function DispatchMessage()  */
-
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static global_data Globals = { 0 };
     switch (message)                  /* handle the messages */
     {
         case WM_CREATE:
-            {
-                CREATESTRUCT *OurCreateStruct = (CREATESTRUCT *)lParam;
-                MyDebugMessage("WM_Create\n");
-                Globals.hInstanse = OurCreateStruct->hInstance;
-
-                // just like VS2017
-                CustomisationSetDefault(hwnd, &Globals.Customization);
-                InputBufferInit(&Globals.LoadedBuffer);
-                ScreenBufferInit(&Globals.DrawBuffer);
-
-                if (InputBufferReadBuffer(OurCreateStruct->lpCreateParams, &Globals.LoadedBuffer))
-                {
-                    Globals.IsInited = TRUE;
-                }
-            }
+            OnCreate(&Globals, wParam, lParam, hwnd);
             break;
         case WM_SIZE:
-            MyDebugMessage("WM_Size\n");
-            if (!Globals.IsInited)
-            {
-                break;
-            }
-
-            {
-                Globals.WindowWidth = LOWORD(lParam);
-                Globals.WindowHeight = HIWORD(lParam);
-
-                ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
-                MyDebugMessage("Window size is %ix%i\n", Globals.WindowWidth , Globals.WindowHeight);
-            }
+            OnSize(&Globals, wParam, lParam, hwnd);
             break;
         case WM_PAINT:
-            MyDebugMessage("WM_Paint\n");
-            if (Globals.IsInited)
-            {
-                ScreenBufferDraw(hwnd, &Globals.DrawBuffer, &Globals.Customization.Font);
-            }
+            OnPaint(&Globals, wParam, lParam, hwnd);
             break;
         case WM_VSCROLL:
-            if (!Globals.IsInited)
-                break;
-
-            {
-                switch (LOWORD(wParam))
-                {
-                    case SB_THUMBPOSITION:
-                    case SB_THUMBTRACK:
-                        ScreenBufferSetVScroll(hwnd, &Globals.DrawBuffer, HIWORD(wParam));
-                        break;
-                    case SB_LINEDOWN:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
-                        break;
-                    case SB_LINEUP:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -LITTLE_VSCROLL);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            OnVScroll(&Globals, wParam, lParam, hwnd);
             break;
         case WM_HSCROLL:
-            if (!Globals.IsInited)
-                break;
-
-            {
-                switch (LOWORD(wParam))
-                {
-                    case SB_THUMBPOSITION:
-                    case SB_THUMBTRACK:
-                        ScreenBufferSetHScroll(hwnd, &Globals.DrawBuffer, HIWORD(wParam));
-                        break;
-                    case SB_LINEDOWN:
-                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
-                        break;
-                    case SB_LINEUP:
-                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            OnHScroll(&Globals, wParam, lParam, hwnd);
             break;
         case WM_MOUSEWHEEL:
-            if (!Globals.IsInited)
-                break;
-            {
-                long zDelta = -GET_WHEEL_DELTA_WPARAM(wParam) / 120;
-                ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer,LITTLE_VSCROLL * zDelta);
-            }
+            OnMouseWheel(&Globals, wParam, lParam, hwnd);
             break;
         case WM_KEYDOWN:
-            if (!Globals.IsInited)
-                break;
-
-            {
-                static DWORD prev_key = -1;
-                static clock_t prev_time = 0;
-                clock_t cur_time = clock();
-
-                if (prev_key == wParam && cur_time - prev_time <= HOLD_DELAY)
-                    break;
-
-                prev_key = wParam;
-                prev_time = cur_time;
-
-                switch (wParam)
-                {
-                    case VK_UP:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -LITTLE_VSCROLL);
-                        break;
-                    case VK_DOWN:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, LITTLE_VSCROLL);
-                        break;
-                    case VK_LEFT:
-                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, -LITTLE_HSCROLL);
-                        break;
-                    case VK_RIGHT:
-                        ScreenBufferChangeHScroll(hwnd, &Globals.DrawBuffer, LITTLE_HSCROLL);
-                        break;
-                    case VK_PRIOR:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, -BIG_VSCROLL);
-                        break;
-                    case VK_NEXT:
-                        ScreenBufferChangeVScroll(hwnd, &Globals.DrawBuffer, BIG_VSCROLL);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            OnKeyDown(&Globals, wParam, lParam, hwnd);
             break;
         case WM_COMMAND:
-            if (!Globals.IsInited)
-                break;
-            {
-                switch (LOWORD(wParam))
-                {
-                    case IDM_ABOUT:
-                        MessageBox(hwnd, "Made by Vladimir Parusov\n"
-                                   "5030102/90201 group\n"
-                                   "Year 2021", "About", MB_OK);
-                        break;
-                    case IDM_VIEW_WRAP:
-                        {
-                            DWORD state ;
-                            state = GetMenuState(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND);
-                            if (state & MF_CHECKED)
-                            {
-                                CheckMenuItem(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND | MF_UNCHECKED);
-                                Globals.DrawBuffer.ViewMode = UNFORMATTED;
-                            }
-                            else
-                            {
-                                CheckMenuItem(GetMenu(hwnd), IDM_VIEW_WRAP, MF_BYCOMMAND | MF_CHECKED);
-                                Globals.DrawBuffer.ViewMode = FORMATTED;
-                            }
-                            ScreenBufferResize(hwnd, &Globals.LoadedBuffer, &Globals.DrawBuffer, &Globals.Customization.Font, Globals.WindowWidth, Globals.WindowHeight);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+            OnCommand(&Globals, wParam, lParam, hwnd);
             break;
         case WM_DESTROY:
-            if (Globals.IsInited)
-            {
-                InputBufferClear(&Globals.LoadedBuffer);
-                ScreenBufferClear(&Globals.DrawBuffer);
-                CustomisationClear(&Globals.Customization);
-            }
+            OnDestroy(&Globals, wParam, lParam, hwnd);
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
             break;
         default:                      /* for messages that we don't deal with */

@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include "input_buffer.h"
 
+// Initialize input buffer
+// INPUT:
+//   input_buffer *buffer - pointer on input_buffer structure
+// OUTPUT:
+//   input_buffer *buffer - pointer on input_buffer structure filled with zero values
 void InputBufferInit(input_buffer *buffer)
 {
     buffer->Data = NULL;
@@ -10,6 +15,13 @@ void InputBufferInit(input_buffer *buffer)
     buffer->MaxLineLength = 0;
 }
 
+// Read data from file and fill all necessary data metadata in input buffer
+// INPUT:
+//   const char *filename - path to file
+// OUTPUT:
+//   bool (returned) - TRUE if operation ended successfully, FALSE otherwise
+//   input_buffer *buffer - pointer on input_buffer structure filled with data and metadata if operation ended successfully.
+//                          otherwise filled with zeroes
 bool InputBufferReadBuffer(const char *filename, input_buffer *buffer)
 {
     FILE *F = NULL;
@@ -71,6 +83,11 @@ bool InputBufferReadBuffer(const char *filename, input_buffer *buffer)
     return TRUE;
 }
 
+// Clear input buffer
+// INPUT:
+//   input_buffer *buffer - pointer on input_buffer structure
+// OUTPUT:
+//   input_buffer *buffer - pointer on input_buffer structure filled with zero values
 void InputBufferClear(input_buffer *buffer)
 {
     if (buffer->Lines != NULL)

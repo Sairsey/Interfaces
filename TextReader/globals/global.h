@@ -12,9 +12,10 @@
 #include "../customization/customization.h"
 
 
+// Struct that represents all data we have in this project
 typedef struct tag_global_data
 {
-    bool IsInited;         // is system inited
+    bool IsInited;         // TRUE if system is inited. FALSE otherwise
 
     input_buffer LoadedBuffer; // model
 
