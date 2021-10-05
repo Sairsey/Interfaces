@@ -288,9 +288,9 @@ void ScreenBufferDraw(HWND hwnd, screen_buffer *buffer, font_params *font)
 {
     HDC hDC;
     PAINTSTRUCT PaintStruct;
-    hDC = BeginPaint(hwnd, &PaintStruct);
     RECT ScreenRect;  // Client rect
 
+    hDC = BeginPaint(hwnd, &PaintStruct);
 
     if (buffer == NULL || buffer->Data == NULL)
     {

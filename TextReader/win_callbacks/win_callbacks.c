@@ -33,11 +33,11 @@ void OnCreate(global_data *Globals, WPARAM wParam, LPARAM lParam, HWND hWnd)
 void OnSize(global_data *Globals, WPARAM wParam, LPARAM lParam, HWND hWnd)
 {
     MyDebugMessage("WM_Size\n");
-    if (!Globals->IsInited)
-        return;
-
     Globals->WindowWidth = LOWORD(lParam);
     Globals->WindowHeight = HIWORD(lParam);
+
+    if (!Globals->IsInited)
+        return;
 
     ScreenBufferResize(hWnd, &Globals->LoadedBuffer, &Globals->DrawBuffer, &Globals->Customization.Font, Globals->WindowWidth, Globals->WindowHeight);
     MyDebugMessage("Window size is %ix%i\n", Globals->WindowWidth , Globals->WindowHeight);
@@ -182,16 +182,62 @@ void OnKeyDown(global_data *Globals, WPARAM wParam, LPARAM lParam, HWND hWnd)
 //   HWND hWnd - data that was sent to WndProc
 void OnCommand(global_data *Globals, WPARAM wParam, LPARAM lParam, HWND hWnd)
 {
-    if (!Globals->IsInited)
-        return;
-
     switch (LOWORD(wParam))
     {
+        case IDM_FILE_OPEN:
+            {
+                OPENFILENAME ofn;       // common dialog box structure
+                char szFile[260];       // buffer for file name
+
+                // Initialize OPENFILENAME
+                ZeroMemory(&ofn, sizeof(ofn));
+                ofn.lStructSize = sizeof(ofn);
+                ofn.hwndOwner = hWnd;
+                ofn.lpstrFile = szFile;
+                // Set lpstrFile[0] to '\0' so that GetOpenFileName does not
+                // use the contents of szFile to initialize itself.
+                ofn.lpstrFile[0] = '\0';
+                ofn.nMaxFile = sizeof(szFile);
+                ofn.lpstrFilter = "*.TXT\0";
+                ofn.nFilterIndex = 1;
+                ofn.lpstrFileTitle = NULL;
+                ofn.nMaxFileTitle = 0;
+                ofn.lpstrInitialDir = NULL;
+                ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+                if (GetOpenFileName(&ofn) == TRUE)
+                {
+                    if (Globals->IsInited)
+                    {
+                        InputBufferClear(&Globals->LoadedBuffer);
+                        ScreenBufferClear(&Globals->DrawBuffer);
+                    }
+
+                    if (InputBufferReadBuffer(ofn.lpstrFile, &Globals->LoadedBuffer))
+                    {
+                        Globals->IsInited = TRUE;
+                        ScreenBufferResize(hWnd, &Globals->LoadedBuffer, &Globals->DrawBuffer, &Globals->Customization.Font, Globals->WindowWidth, Globals->WindowHeight);
+                    }
+                }
+            };
+            break;
         case IDM_ABOUT:
             MessageBox(hWnd, "Made by Vladimir Parusov\n"
                     "5030102/90201 group\n"
                     "Year 2021", "About", MB_OK);
             break;
+        case IDM_FILE_EXIT:
+            SendMessage(hWnd, WM_CLOSE, 0, 0);
+            break;
+        default:
+            break;
+    }
+
+    if (!Globals->IsInited)
+        return;
+
+    switch (LOWORD(wParam))
+    {
         case IDM_VIEW_WRAP:
             {
                 DWORD state ;

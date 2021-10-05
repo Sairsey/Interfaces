@@ -11,7 +11,7 @@ void CustomizationSetDefault(HWND hwnd, customization_params *custom)
     custom->BackgroundColor = RGB(30, 30, 30);
     custom->TextColor = RGB(255, 255, 255);
     custom->Font.hFont = NULL;
-    CustomizationSetFont(hwnd, "Times New Roman", &custom->Font);
+    CustomizationSetFont(hwnd, "Monotype Corsiva", &custom->Font);
 
     // set background and text color
     {
@@ -86,7 +86,7 @@ void CustomizationSetFont(HWND hwnd, TCHAR *font_name, font_params *font)
     if (font->hFont != NULL)
         DeleteObject(font->hFont);
 
-    font->LineHeight = 32;
+    font->LineHeight = 50;
 
     // Create font I like
     font->hFont = CreateFont(font->LineHeight, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, font_name);

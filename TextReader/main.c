@@ -76,7 +76,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     ShowWindow (hwnd, nCmdShow);
 
     /* Run the message loop. It will run until GetMessage() returns 0 */
-    while (GetMessage (&messages, NULL, 0, 0))
+    while (GetMessage(&messages, NULL, 0, 0))
     {
         /* Translate virtual-key messages into character messages */
         TranslateMessage(&messages);

@@ -20,7 +20,7 @@
 1630942296 e:\github\interfaces\textreader\file_support\file_support.h
 	"../globals/global.h"
 
-1633382964 source:e:\github\interfaces\textreader\main.c
+1633456790 source:e:\github\interfaces\textreader\main.c
 	<tchar.h>
 	<windows.h>
 	"menu_defines.h"
@@ -84,7 +84,7 @@
 	"screen_buffer.h"
 	"math.h"
 
-1633383237 source:e:\github\interfaces\textreader\customization\customization.c
+1633457060 source:e:\github\interfaces\textreader\customization\customization.c
 	"customization.h"
 
 1633383221 e:\github\interfaces\textreader\customization\customization.h
@@ -96,7 +96,7 @@
 	<time.h>
 	"windows.h"
 
-1632255764 source:e:\github\interfaces\textreader\input_buffer\input_buffer.c
+1633383385 source:e:\github\interfaces\textreader\input_buffer\input_buffer.c
 	<stdio.h>
 	"input_buffer.h"
 
@@ -108,7 +108,7 @@
 	"../customization/customization.h"
 	"../input_buffer/input_buffer.h"
 
-1633364549 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
+1633456411 source:e:\github\interfaces\textreader\screen_buffer\screen_buffer.c
 	"screen_buffer.h"
 	"math.h"
 
@@ -117,15 +117,15 @@
 1633158360 source:d:\work\interfaces\interfaces\textreader\menu.rc
 	"menu_defines.h"
 
-1633382535 source:e:\github\interfaces\textreader\menu.rc
+1633457833 source:e:\github\interfaces\textreader\menu.rc
 	"menu_defines.h"
 
-1633364549 e:\github\interfaces\textreader\menu_defines.h
+1633457993 e:\github\interfaces\textreader\menu_defines.h
 
 1633383829 e:\github\interfaces\textreader\win_callbacks\win_callbacks.h
 	"../globals/global.h"
 
-1633383234 source:e:\github\interfaces\textreader\win_callbacks\win_callbacks.c
+1633458089 source:e:\github\interfaces\textreader\win_callbacks\win_callbacks.c
 	"win_callbacks.h"
 	"../menu_defines.h"
 
